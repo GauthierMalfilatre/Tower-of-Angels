@@ -1,6 +1,7 @@
 ## Perf - Kojiverse Productions
 from time import *
 from ion import *
+from kandinsky import fill_rect
 
 global _FPSs
 _FPSs = list(range(30))
@@ -16,6 +17,17 @@ def presses_update():
 
 click = lambda key:presses[key][-1] and not presses[key][-2]
 release = lambda key:presses[key][-2] and not presses[key][-1] 
+
+def get_dir(pos1: list, pos2: list) -> tuple:
+    """ Get x and y offset to go from pos1 to pos2 """
+    dx: int = pos2[0] - pos1[0]
+    dy: int = pos2[1] - pos1[1]
+    norm: float = (dy ** 2 + dx ** 2) ** 0.5
+
+    return (dx / norm, dy / norm)
+
+def super_fill_rect(x: int, y: int, width: int, height: int, color: tuple | str) -> None:
+   fill_rect(int(x), int(y), int(width), int(height), color)
 
 def max_fps():
   _FPSs.append(monotonic()-_start_frame[0])

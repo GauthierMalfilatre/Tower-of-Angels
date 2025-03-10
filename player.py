@@ -13,13 +13,13 @@ stats :
     atk: int
     tc: float
     dc: float
-    pv: tuple (current, max)
+    pv: list (current, max)
     def: int
     spd: int
 """
 
 class Player:
-    def __init__(self, stats: dict = {"atk" : 10, "tc" : 5, "dc" : 30, "pv" : (100, 100), "def" : 10, "spd" : 10}) -> None:
+    def __init__(self, stats: dict = {"atk" : 10, "tc" : 5, "dc" : 30, "pv" : [100, 100], "def" : 10, "spd" : 5}) -> None:
         """ Player variables initialization """
         self.stats = stats
         self.vel = [0, 0]
@@ -45,7 +45,7 @@ class Player:
 
         return
     
-    def attack(self) -> int:
+    def __attack(self) -> int:
         if not keydown(KEY_OK):
             return 0
         a = randint(0, 100)
@@ -56,12 +56,12 @@ class Player:
 
         return 1
 
-    def render(self) -> None:
+    def _render(self) -> None:
         """ Player render """
         fill_rect(self.pos[0], self.pos[1], self.size, self.size, "#FF0000")
 
     def globall(self):
         """ Global player call """
         self.__move()
-        self.attack()
-        self.render()
+        self.__attack()
+        self._render()
