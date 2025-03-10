@@ -7,6 +7,8 @@
 from ion import keydown, KEY_RIGHT, KEY_LEFT, KEY_UP, KEY_DOWN, KEY_OK, KEY_BACK
 from kandinsky import fill_rect
 from random import randint
+from time import monotonic
+from sprites import archangel, draw_sprite, colors
 
 """
 stats : 
@@ -19,12 +21,16 @@ stats :
 """
 
 class Player:
-    def __init__(self, stats: dict = {"atk" : 10, "tc" : 5, "dc" : 30, "pv" : [100, 100], "def" : 10, "spd" : 5}) -> None:
+    def __init__(self, level: int = 0, stats: dict = {"atk" : 10, "tc" : 5, "dc" : 30, "hp" : [100, 100], "def" : 10, "spd" : 5}) -> None:
         """ Player variables initialization """
         self.stats = stats
         self.vel = [0, 0]
         self.size = 16
+        self.level = level
         self.pos = [(320 - self.size) // 2, (222 - self.size) // 2]
+        self.delay = [0, 0.5]
+        self.sword = [0, 0]
+        self.cooldown = [0, 0]
 
     def __move(self) -> None:
         """ Player movement """
@@ -44,24 +50,35 @@ class Player:
         self.pos[1] += self.vel[1] * self.stats["spd"]
 
         return
-    
-    def __attack(self) -> int:
-        if not keydown(KEY_OK):
-            return 0
+
+    def _attack(self) -> int:
+        """ Take damage and deal with def """
         a = randint(0, 100)
         is_critical = a <= self.stats["tc"]
         damages = self.stats["atk"] * (1 + ((self.stats["dc"] / 100) if is_critical else 0))
 
         print("Attack : damage deal = %d, is_critical = %d, a = %d"%(damages, is_critical, a))
 
-        return 1
+        return damages
 
     def _render(self) -> None:
         """ Player render """
         fill_rect(self.pos[0], self.pos[1], self.size, self.size, "#FF0000")
+        # draw_sprite(archangel, colors["samael"], int(self.pos[0]), int(self.pos[1]), 1)
+
+    def take_damage(self, damages: int) -> int:
+        if self.delay[0]:
+            return 1
+
+        self.stats["hp"][0] -= (damages * 1 - self.stats["def"] / 1000)
+        print("Taken %d damages!"%(damages * 1 - self.stats["def"] / 1000))
+        self.delay[0] = monotonic()
+        return 0
 
     def globall(self):
         """ Global player call """
+        if monotonic() - self.delay[0] > self.delay[1]:
+            self.delay[0] = 0
         self.__move()
-        self.__attack()
+        # self.__attack()
         self._render()

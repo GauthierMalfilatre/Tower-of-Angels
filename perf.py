@@ -26,6 +26,13 @@ def get_dir(pos1: list, pos2: list) -> tuple:
 
     return (dx / norm, dy / norm)
 
+def collideRect(rect1,rect2):
+  x1, y1, w1, h1 = rect1
+  x2, y2, w2, h2 = rect2
+  w1,h1 = w1+x1,h1+y1
+  w2,h2 = w2+x2,h2+y2
+  return (x1<w2 and w1>x2 and y1<h2 and h1>y2) 
+
 def super_fill_rect(x: int, y: int, width: int, height: int, color: tuple | str) -> None:
    fill_rect(int(x), int(y), int(width), int(height), color)
 
