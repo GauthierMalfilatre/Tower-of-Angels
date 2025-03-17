@@ -31,6 +31,9 @@ class Angels:
         self.level = level
         self.delay = [0, 0.5]
 
+    def _rect(self) -> tuple:
+        return (self.pos[0], self.pos[1], self.size, self.size)
+
     def on_damage(self) -> None:
         """ Draw a string with damages takens """
         if self.delay[0]:
@@ -54,7 +57,6 @@ class Angels:
 
         self.last_damages = (damages * 1 - self.stats["def"] / 1000)
         self.stats["hp"][0] -= self.last_damages
-        print("Angel takes %d damages!"%(damages * 1 - self.stats["def"] / 1000))
         self.delay[0] = monotonic()
         return 0
 

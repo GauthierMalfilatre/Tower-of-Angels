@@ -14,6 +14,8 @@ from angels import Ruor
 player = Player()
 test = Ruor(player)
 test2 = Ruor(player)
+player.targets = [test, test2]
+
 
 running = True
 while running:
@@ -22,9 +24,6 @@ while running:
     player.globall()
     test.globall()
     test2.globall()
-
-    if keydown(KEY_OK):
-        test.take_damage(player._attack())
 
     if (player.stats["hp"][0] <= 0):
         print("Game over")

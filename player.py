@@ -9,6 +9,7 @@ from kandinsky import fill_rect
 from random import randint
 from time import monotonic
 from sprites import archangel, draw_sprite, colors
+from perf import collideRect
 
 """
 stats : 
@@ -21,7 +22,7 @@ stats :
 """
 
 class Player:
-    def __init__(self, level: int = 0, stats: dict = {"atk" : 10, "tc" : 5, "dc" : 30, "hp" : [100, 100], "def" : 10, "spd" : 5}) -> None:
+    def __init__(self, level: int = 0, stats: dict = {"atk" : 10, "tc" : 5, "dc" : 30, "hp" : [100, 100], "def" : 10, "spd" : 5}, targets: list = []) -> None:
         """ Player variables initialization """
         self.stats = stats
         self.vel = [0, 0]
@@ -30,7 +31,11 @@ class Player:
         self.pos = [(320 - self.size) // 2, (222 - self.size) // 2]
         self.delay = [0, 0.5]
         self.sword = [0, 0]
-        self.cooldown = [0, 0]
+        self.cooldown = [0, 0.5]
+        self.targets = targets
+
+    def _rect(self) -> tuple:
+        return (self.pos[0], self.pos[1], self.size, self.size)
 
     def __move(self) -> None:
         """ Player movement """
@@ -46,6 +51,9 @@ class Player:
         elif keydown(KEY_LEFT):
             self.vel[0] = -1
 
+        if keydown(KEY_OK):
+            self._attack()
+
         self.pos[0] += self.vel[0] * self.stats["spd"]
         self.pos[1] += self.vel[1] * self.stats["spd"]
 
@@ -53,13 +61,18 @@ class Player:
 
     def _attack(self) -> int:
         """ Take damage and deal with def """
-        a = randint(0, 100)
-        is_critical = a <= self.stats["tc"]
-        damages = self.stats["atk"] * (1 + ((self.stats["dc"] / 100) if is_critical else 0))
+        if self.cooldown[0]:
+            return 1
 
-        print("Attack : damage deal = %d, is_critical = %d, a = %d"%(damages, is_critical, a))
-
-        return damages
+        for target in self.targets:
+            if collideRect(self._rect(), target._rect()):
+                a = randint(0, 100)
+                is_critical = a <= self.stats["tc"]
+                damages = self.stats["atk"] * (1 + ((self.stats["dc"] / 100) if is_critical else 0))
+                target.take_damage(damages)
+                print("deal %d damages to %s"%(damages, target))
+                self.cooldown[0] = monotonic()
+        return 0
 
     def _render(self) -> None:
         """ Player render """
@@ -79,6 +92,8 @@ class Player:
         """ Global player call """
         if monotonic() - self.delay[0] > self.delay[1]:
             self.delay[0] = 0
+        if monotonic() - self.cooldown[0] > self.cooldown[1]:
+            self.cooldown[0] = 0
+
         self.__move()
-        # self.__attack()
         self._render()
